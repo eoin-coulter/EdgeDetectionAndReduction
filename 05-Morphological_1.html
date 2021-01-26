@@ -1,0 +1,37 @@
+<html>
+ <head>
+  <script src="imageProcessingFunctions.js"></script>
+  <style>
+    input { width:25px; }
+  </style>
+  <script>
+    // these globals are set in readImage()
+    var imgWidth, imgHeight;
+    var ctx;
+
+    function loadImage() {
+      var textbox = document.getElementById("filename");
+      var filename = textbox.value;
+      var canvas = document.getElementById("canvas");
+      readImage(canvas,filename);
+    }
+    function processImage() {
+      var imageData = ctx.getImageData(0, 0, imgWidth, imgHeight);
+      greyscale(imageData);
+      threshold(imageData, 127);
+      erode(imageData, 13);
+      dilate(imageData, 13);
+      dilate(imageData, 13);
+      erode(imageData, 13);
+      ctx.putImageData(imageData, 0, 0); 
+    }
+  </script>
+ </head>
+
+ <body>
+   <canvas id="canvas" style="border-width:1px; border-style:solid;" width="500" height="500"></canvas><br>
+   <input type="text" id="filename" style="width:600px;" value="images/white_square_noisy.jpg"> <input type="button" style="width:100px;" onclick="loadImage();" value="Load Image"><br>
+   
+    <input type="button" style="width:180px;" value="Process Image" onclick="processImage();">
+ </body>
+</html>
