@@ -357,6 +357,10 @@ function pruning(imageData, pruneLength, bWithRegrowth) {
 		imageData.data[i] = outputData[i];
 }
 
+
+
+//get magnitude
+//for each pixel G = sqrt(Gx + Gy )sqrd
 function magnitude(imageData,Gx,Gy) {
 	var outputData = new Array();
 	var sz = imageData.data.length;
@@ -384,6 +388,8 @@ function magnitude(imageData,Gx,Gy) {
 
 
 }
+//get theta
+
 function getEdgeOrientation(imageData,Gx,Gy) {
 
 	var outputData = new Array();
@@ -401,9 +407,11 @@ function getEdgeOrientation(imageData,Gx,Gy) {
 
 
 			var radians = 1.5708 + Math.atan(Gy[index] / Gx[index]);
-
+			//convert from radians to degrees
 			var degrees = radians * (180 / pi);
+			//round to 4 possible values
 			var roundedValue = roundDir(degrees);
+			//return values of theta for each pixel
 			outputData[index]= outputData[index+1]= outputData[index+2]=roundedValue;
 
 
@@ -462,12 +470,13 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 		for (x = 0; x < wid; x++) {
 			for (y = 0; y < hgt; y++) {
 				var index = (x + y * wid) * 4;
-				if (imageData.data[index] > 90) {
+				//upper hysteris value
+				if (imageData.data[index] > 80) {
 
-
+					//gradient = angle at corresponding pixel
 					var angle = theta[index];
 
-
+					//create kernal around pixel
 					var kernal = {
 						pixelX1Y1: imageData.data[index + 0],
 						pixelX1Y0: imageData.data[index + wid * 4],
@@ -480,7 +489,7 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 						pixelX2Y2: imageData.data[(index - wid * 4) + 4]
 					};
 
-
+					//check if kernal is valid
 					var isKernalvalid = true;
 					for (var properties in kernal) {
 						if (kernal[properties] === undefined) {
@@ -491,22 +500,25 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 						continue;
 					}
 
-
+					//if angle = 0 check if max of pixels right and left is higher than above and below and so on
 					if (angle == 0) {
-						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) < Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1) > 80  ) {
+						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) < Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1) > 60  ) {//lower hysterisis value
+							//set values to white if satisfied
 							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 
 
 						} else
+							//If just canny uncomment below and comment relaxation approach
 							// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
 							relaxationApproach1(imageData,index,theta);
+							//pass pixel on if rejected to relaxation approach
 
 
 					}
 
 
 					if (angle == 45) {
-						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
+						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 60) {
 							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 
 
@@ -518,18 +530,18 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 					}
 
 					if (angle == 90) {
-						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > 80) {
+						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > 60) {
 							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 
 
 						} else
-							// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
+							 imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
 							relaxationApproach1(imageData,index,theta);
 
 					}
 
 					if (angle == 135) {
-						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
+						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 60) {
 							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 
 
@@ -568,7 +580,7 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 function relaxationApproach1(imageData, index, theta){
 
 	var wid = imageData.width;
-
+	//get gradient for pixel from gradient array
 	var anglePixel = theta[index];
 
 
@@ -577,11 +589,12 @@ function relaxationApproach1(imageData, index, theta){
 
 
 	if (anglePixel == 0) {
-
+		//move two pixels accross
 			var newIndex = [index+8];
+			//method to create new kernal form one pixel
 			var newKernel = create3x3kernal(newIndex,imageData);
 			var isKernalvalid = true;
-
+			//check if kernal is valid
 			for (var properties in newKernel) {
 
 				if (newKernel[properties] === undefined) {
@@ -591,7 +604,9 @@ function relaxationApproach1(imageData, index, theta){
 			if (isKernalvalid === false) {
 				return;
 			}if(anglePixel ==0){
+				//if satisfies new condition
 			if ((Math.max(newKernel.data.pixelX1Y2, newKernel.data.pixelX1Y0) < Math.max(newKernel.data.pixelX0Y1, newKernel.data.pixelX2Y1)) && Math.max(newKernel.data.pixelX0Y1, newKernel.data.pixelX2Y1) > 20  ) {
+				//if satisfied turn pixels inbetween white
 				imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 				imageData.data[newIndex] = imageData.data[newIndex + 1] = imageData.data[newIndex + 2] = 255;}
 
@@ -604,6 +619,7 @@ function relaxationApproach1(imageData, index, theta){
 
 
 	if (anglePixel == 45) {
+		//move two picels on the gradient and create kernal
 		var newIndex = [(index - (wid * 2 ) * 4)+8];
 		var newKernel = create3x3kernal(newIndex,imageData);
 		isKernalvalid = true;
@@ -684,7 +700,7 @@ else{
 }
 }
 
-
+//for creation of 5x5 kernal if required
 function create5x5kernal(index,imageData){
 	var wid = imageData.width;
 	var kernal = {
@@ -700,6 +716,7 @@ function create5x5kernal(index,imageData){
 	return kernal;
 
 }
+//create kernal based on central pixel
 function create3x3kernal(index,imageData){
 	var wid = imageData.width;
 	var kernal = {
@@ -730,6 +747,7 @@ function create3x3kernal(index,imageData){
 }
 
 
+
 function RelaxationApproach2(G,theta,imageData,) {
 	var sz = imageData.data.length;
 	for (i = 0; i < sz; i++) {
@@ -738,18 +756,18 @@ function RelaxationApproach2(G,theta,imageData,) {
 
 	var wid = imageData.width;
 	var hgt = imageData.height;
-
-	for (i = 0; i < 15; i++) {
+//loop through pixels 10 times
+	for (i = 0; i < 10; i++) {
 		for (x = 0; x < wid; x++) {
 			for (y = 0; y < hgt; y++) {
 				var index = (x + y * wid) * 4;
+				//min threshold
+				if (imageData.data[index] > 50) {
 
-				if (imageData.data[index] > 10) {
-
-
+					//create kernal for neibhourhood of pixel
 					var kernel = create3x3kernal(index, imageData);
 
-
+					//check if kernal valid
 					var isKernalvalid = true;
 					for (var properties in kernel) {
 						if (kernel[properties] === undefined) {
@@ -760,39 +778,39 @@ function RelaxationApproach2(G,theta,imageData,) {
 						continue;
 					}
 
-
+					//loop through neighbours
 					for (var properties1 of Object.values(kernel.location)) {
-
+							//if central pixel skip
 						if (imageData.data[properties1] === imageData.data[index]) {
 							continue;
 						}
 
-
-						if (Math.abs(imageData.data[properties1] - imageData.data[index]) <= 40 && (theta[properties1] === theta[index])) {
-							imageData.data[index] = imageData.data[index] + 10;
+						//find difference between neibhours if difference above 120 or incorrect gradient -20 else +20
+						if (Math.abs(imageData.data[properties1] - imageData.data[index]) <= 120 && (theta[properties1] === theta[index])) {
+							imageData.data[index] = imageData.data[index] + 20;
 							if (imageData.data[index] > 255) {
 								imageData.data[index] = 255;
 							}
-							imageData.data[index + 1] = imageData.data[index + 1] + 10;
+							imageData.data[index + 1] = imageData.data[index + 1] + 20;
 							if (imageData.data[index + 1] > 255) {
 								imageData.data[index + 1] = 255;
 							}
-							imageData.data[index + 2] = imageData.data[index + 2] + 10;
+							imageData.data[index + 2] = imageData.data[index + 2] + 20;
 							if (imageData.data[index + 2] > 255) {
 								imageData.data[index + 2] = 255;
 							}
 
 
 						} else {
-							imageData.data[index] = imageData.data[index] - 10;
+							imageData.data[index] = imageData.data[index] - 20;
 							if (imageData.data[index] < 0) {
 								imageData.data[index] = 0;
 							}
-							imageData.data[index + 1] = imageData.data[index + 1] - 10;
+							imageData.data[index + 1] = imageData.data[index + 1] - 20;
 							if (imageData.data[index + 1] < 0) {
 								imageData.data[index + 1] = 0;
 							}
-							imageData.data[index + 2] = imageData.data[index + 2] - 10;
+							imageData.data[index + 2] = imageData.data[index + 2] - 20;
 							if (imageData.data[index + 2] < 0) {
 								imageData.data[index + 2] = 0;
 							}
@@ -801,6 +819,10 @@ function RelaxationApproach2(G,theta,imageData,) {
 
 					}
 
+
+				}
+				else{
+					imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
 
 				}
 			}
