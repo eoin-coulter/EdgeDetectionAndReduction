@@ -438,109 +438,131 @@ function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal,
 
 
 
-function edgeTrace(G,theta,imageData) {
 
 
-	var sz = imageData.data.length;
-	for (i=0;i<sz;i++)
-		 imageData.data[i] = G[i];
 
 
-	var wid = imageData.width;
-	var hgt = imageData.height;
 
 
-	for (x = 0; x < wid; x++) {
-		for (y = 0; y < hgt; y++) {
-			var index = (x + y * wid) * 4;
-			if (imageData.data[index] > 90) {
 
 
-				var angle = theta[index];
+
+	function edgeTrace(G,theta,imageData) {
 
 
-				var kernal = {
-					pixelX1Y1: imageData.data[index + 0],
-					pixelX1Y0: imageData.data[index + wid * 4],
-					pixelX1Y2: imageData.data[index - wid * 4],
-					pixelX0Y1: imageData.data[index - 4],
-					pixelX2Y1: imageData.data[index + 4],
-					pixelX0Y0: imageData.data[(index + wid * 4) - 4],
-					pixelX2Y0: imageData.data[(index + wid * 4) + 4],
-					pixelX0Y2: imageData.data[(index - wid * 4) - 4],
-					pixelX2Y2: imageData.data[(index - wid * 4) + 4]
-				};
+		var sz = imageData.data.length;
+		for (i=0;i<sz;i++)
+			imageData.data[i] = G[i];
 
 
-				var isKernalvalid = true;
-				for (var properties in kernal) {
-					if (kernal[properties] === undefined) {
-						isKernalvalid = false;
+		var wid = imageData.width;
+		var hgt = imageData.height;
+
+
+		for (x = 0; x < wid; x++) {
+			for (y = 0; y < hgt; y++) {
+				var index = (x + y * wid) * 4;
+				if (imageData.data[index] > 90) {
+
+
+					var angle = theta[index];
+
+
+					var kernal = {
+						pixelX1Y1: imageData.data[index + 0],
+						pixelX1Y0: imageData.data[index + wid * 4],
+						pixelX1Y2: imageData.data[index - wid * 4],
+						pixelX0Y1: imageData.data[index - 4],
+						pixelX2Y1: imageData.data[index + 4],
+						pixelX0Y0: imageData.data[(index + wid * 4) - 4],
+						pixelX2Y0: imageData.data[(index + wid * 4) + 4],
+						pixelX0Y2: imageData.data[(index - wid * 4) - 4],
+						pixelX2Y2: imageData.data[(index - wid * 4) + 4]
+					};
+
+
+					var isKernalvalid = true;
+					for (var properties in kernal) {
+						if (kernal[properties] === undefined) {
+							isKernalvalid = false;
+						}
 					}
+					if (isKernalvalid === false) {
+						continue;
+					}
+
+
+					if (angle == 0) {
+						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) < Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1) > 80  ) {
+							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
+
+
+						} else
+							// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
+							relaxationApproach1(imageData,index,theta);
+
+
+					}
+
+
+					if (angle == 45) {
+						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
+							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
+
+
+						} else
+							//imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
+							relaxationApproach1(imageData,index,theta);
+
+
+					}
+
+					if (angle == 90) {
+						if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > 80) {
+							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
+
+
+						} else
+							// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
+							relaxationApproach1(imageData,index,theta);
+
+					}
+
+					if (angle == 135) {
+						if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
+							imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
+
+
+						} else
+							//imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
+							relaxationApproach1(imageData,index,theta);
+
+					}
+
 				}
-				if (isKernalvalid === false) {
-					continue;
-				}
+				else{
+					imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
 
 
-				if (angle == 0) {
-					if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) < Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1) > 80  ) {
-						imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 
-
-					} else
-						// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
-					   relaxationApproach1(imageData,index,theta);
-
-
-				}
-
-
-				if (angle == 45) {
-					if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
-						imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
-
-
-					} else
-					 //imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
-					 relaxationApproach1(imageData,index,theta);
-
-
-				}
-
-				if (angle == 90) {
-					if ((Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > Math.max(kernal.pixelX0Y1, kernal.pixelX2Y1)) && Math.max(kernal.pixelX1Y2, kernal.pixelX1Y0) > 80) {
-						imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
-
-
-					} else
-						// imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
-					     relaxationApproach1(imageData,index,theta);
-
-				}
-
-				if (angle == 135) {
-					if ((Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > Math.max(kernal.pixelX0Y2, kernal.pixelX2Y0)) && Math.max(kernal.pixelX2Y2, kernal.pixelX0Y0) > 80) {
-						imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
-
-
-					} else
-						//imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
-					     relaxationApproach1(imageData,index,theta);
 
 				}
 
 			}
-			else{
-				imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 0;
-
-
-			}
-
 		}
-	}
+
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 function relaxationApproach1(imageData, index, theta){
@@ -558,8 +580,10 @@ function relaxationApproach1(imageData, index, theta){
 
 			var newIndex = [index+8];
 			var newKernel = create3x3kernal(newIndex,imageData);
+			var isKernalvalid = true;
 
 			for (var properties in newKernel) {
+
 				if (newKernel[properties] === undefined) {
 					isKernalvalid = false;
 				}
@@ -567,7 +591,7 @@ function relaxationApproach1(imageData, index, theta){
 			if (isKernalvalid === false) {
 				return;
 			}if(anglePixel ==0){
-			if ((Math.max(newkernal.pixelX1Y2, newKernel.pixelX1Y0) < Math.max(newKernel.pixelX0Y1, newKernel.pixelX2Y1)) && Math.max(newKerne.pixelX0Y1, newKernel.pixelX2Y1) > 80  ) {
+			if ((Math.max(newKernel.data.pixelX1Y2, newKernel.data.pixelX1Y0) < Math.max(newKernel.data.pixelX0Y1, newKernel.data.pixelX2Y1)) && Math.max(newKernel.data.pixelX0Y1, newKernel.data.pixelX2Y1) > 20  ) {
 				imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 				imageData.data[newIndex] = imageData.data[newIndex + 1] = imageData.data[newIndex + 2] = 255;}
 
@@ -582,6 +606,7 @@ function relaxationApproach1(imageData, index, theta){
 	if (anglePixel == 45) {
 		var newIndex = [(index - (wid * 2 ) * 4)+8];
 		var newKernel = create3x3kernal(newIndex,imageData);
+		isKernalvalid = true;
 
 		for (var properties in newKernel) {
 			if (newKernel[properties] === undefined) {
@@ -591,7 +616,7 @@ function relaxationApproach1(imageData, index, theta){
 		if (isKernalvalid === false) {
 			return;
 		}
-		if ((Math.max(newKernel.pixelX2Y2, newKernel.pixelX0Y0) > Math.max(newKernel.pixelX0Y2, newKernel.pixelX2Y0)) && Math.max(newKernel.pixelX2Y2, newKernel.pixelX0Y0) > 80) {
+		if ((Math.max(newKernel.data.pixelX2Y2, newKernel.data.pixelX0Y0) > Math.max(newKernel.data.pixelX0Y2, newKernel.data.pixelX2Y0)) && Math.max(newKernel.data.pixelX2Y2, newKernel.data.pixelX0Y0) > 20) {
 			imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 			imageData.data[newIndex] = imageData.data[newIndex + 1] = imageData.data[newIndex + 2] = 255;
 
@@ -604,6 +629,7 @@ function relaxationApproach1(imageData, index, theta){
 	if (anglePixel == 90) {
 		var newIndex = [(index - (wid * 2 ) * 4)];
 		var newKernel = create3x3kernal(newIndex,imageData);
+		isKernalvalid = true;
 
 		for (var properties in newKernel) {
 			if (newKernel[properties] === undefined) {
@@ -613,7 +639,7 @@ function relaxationApproach1(imageData, index, theta){
 		if (isKernalvalid === false) {
 			return;
 		}
-		if((Math.max(newKernel.pixelX1Y2, kernal.pixelX1Y0) > Math.max(newKernel.pixelX0Y1, newKernel.pixelX2Y1)) && Math.max(newKernel.pixelX1Y2, newKernel.pixelX1Y0) > 80){
+		if((Math.max(newKernel.data.pixelX1Y2, newKernel.data.pixelX1Y0) > Math.max(newKernel.data.pixelX0Y1, newKernel.data.pixelX2Y1)) && Math.max(newKernel.data.pixelX1Y2, newKernel.data.pixelX1Y0) > 20){
 
 			imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 			imageData.data[newIndex] = imageData.data[newIndex + 1] = imageData.data[newIndex + 2] = 255;
@@ -624,6 +650,7 @@ function relaxationApproach1(imageData, index, theta){
 
 
 	if (anglePixel == 135) {
+		isKernalvalid = true;
 
 		var newIndex = [(index - (wid * 2 ) * 4) -8];
 		var newKernel = create3x3kernal(newIndex,imageData);
@@ -636,7 +663,7 @@ function relaxationApproach1(imageData, index, theta){
 		if (isKernalvalid === false) {
 			return;
 		}
-		if ((Math.max(newKernel.pixelX2Y2, newKernel.pixelX0Y0) > Math.max(newKernel.pixelX0Y2, newKernel.pixelX2Y0)) && Math.max(newKernel.pixelX2Y2, newKernel.pixelX0Y0) > 80) {
+		if ((Math.max(newKernel.data.pixelX2Y2, newKernel.data.pixelX0Y0) > Math.max(newKernel.data.pixelX0Y2, newKernel.data.pixelX2Y0)) && Math.max(newKernel.data.pixelX2Y2, newKernel.data.pixelX0Y0) > 20) {
 
 			imageData.data[index] = imageData.data[index + 1] = imageData.data[index + 2] = 255;
 			imageData.data[newIndex] = imageData.data[newIndex + 1] = imageData.data[newIndex + 2] = 255;
@@ -676,47 +703,111 @@ function create5x5kernal(index,imageData){
 function create3x3kernal(index,imageData){
 	var wid = imageData.width;
 	var kernal = {
-		pixelX1Y1: imageData.data[index + 0],
-		pixelX1Y0: imageData.data[index + wid * 4],
-		pixelX1Y2: imageData.data[index - wid * 4],
-		pixelX0Y1: imageData.data[index - 4],
-		pixelX2Y1: imageData.data[index + 4],
-		pixelX0Y0: imageData.data[(index + wid * 4) - 4],
-		pixelX2Y0: imageData.data[(index + wid * 4) + 4],
-		pixelX0Y2: imageData.data[(index - wid * 4) - 4],
-		pixelX2Y2: imageData.data[(index - wid * 4) + 4]
-	};
+
+			data : {
+				pixelX1Y1: imageData.data[index + 0],
+				pixelX1Y0: imageData.data[index + wid * 4],
+				pixelX1Y2: imageData.data[index - wid * 4],
+				pixelX0Y1: imageData.data[index - 4],
+				pixelX2Y1: imageData.data[index + 4],
+				pixelX0Y0: imageData.data[(index + wid * 4) - 4],
+				pixelX2Y0: imageData.data[(index + wid * 4) + 4],
+				pixelX0Y2: imageData.data[(index - wid * 4) - 4],
+				pixelX2Y2: imageData.data[(index - wid * 4) + 4],},
+
+			location:{
+				pixelX1Y1Location: index + 0,
+				pixelX1Y0Location: index + wid * 4,
+				pixelX1Y2Location: index - wid * 4,
+				pixelX0Y1Location: index - 4,
+				pixelX2Y1Location: index + 4,
+				pixelX0Y0Location: (index + wid * 4) - 4,
+				pixelX2Y0Location: (index + wid * 4) + 4,
+				pixelX0Y2Location: (index - wid * 4) - 4,
+				pixelX2Y2Location: (index - wid * 4) + 4}
+		};
 	return kernal;
 }
 
 
-function RelaxationApproach2(G,theta,imageData){
+function RelaxationApproach2(G,theta,imageData,) {
 	var sz = imageData.data.length;
-	for (i=0;i<sz;i++)
+	for (i = 0; i < sz; i++) {
 		imageData.data[i] = G[i];
+	}
+
+	var wid = imageData.width;
+	var hgt = imageData.height;
+
+	for (i = 0; i < 15; i++) {
+		for (x = 0; x < wid; x++) {
+			for (y = 0; y < hgt; y++) {
+				var index = (x + y * wid) * 4;
+
+				if (imageData.data[index] > 10) {
 
 
-
-	for (x = 0; x < wid; x++) {
-		for (y = 0; y < hgt; y++) {
-			var index = (x + y * wid) * 4;
-			var angle = theta[index];
-
-			var Kernel = create3x3kernal(index,imageData);
+					var kernel = create3x3kernal(index, imageData);
 
 
-			var isKernalvalid = true;
-			for (var properties in kernal) {
-				if (kernal[properties] === undefined) {
-					isKernalvalid = false;
+					var isKernalvalid = true;
+					for (var properties in kernel) {
+						if (kernel[properties] === undefined) {
+							isKernalvalid = false;
+						}
+					}
+					if (isKernalvalid === false) {
+						continue;
+					}
+
+
+					for (var properties1 of Object.values(kernel.location)) {
+
+						if (imageData.data[properties1] === imageData.data[index]) {
+							continue;
+						}
+
+
+						if (Math.abs(imageData.data[properties1] - imageData.data[index]) <= 40 && (theta[properties1] === theta[index])) {
+							imageData.data[index] = imageData.data[index] + 10;
+							if (imageData.data[index] > 255) {
+								imageData.data[index] = 255;
+							}
+							imageData.data[index + 1] = imageData.data[index + 1] + 10;
+							if (imageData.data[index + 1] > 255) {
+								imageData.data[index + 1] = 255;
+							}
+							imageData.data[index + 2] = imageData.data[index + 2] + 10;
+							if (imageData.data[index + 2] > 255) {
+								imageData.data[index + 2] = 255;
+							}
+
+
+						} else {
+							imageData.data[index] = imageData.data[index] - 10;
+							if (imageData.data[index] < 0) {
+								imageData.data[index] = 0;
+							}
+							imageData.data[index + 1] = imageData.data[index + 1] - 10;
+							if (imageData.data[index + 1] < 0) {
+								imageData.data[index + 1] = 0;
+							}
+							imageData.data[index + 2] = imageData.data[index + 2] - 10;
+							if (imageData.data[index + 2] < 0) {
+								imageData.data[index + 2] = 0;
+							}
+						}
+
+
+					}
+
+
 				}
 			}
-			if (isKernalvalid === false) {
-				continue;
-			}
-
-
 		}
-	}}
+	}
+
+}
+
 
 

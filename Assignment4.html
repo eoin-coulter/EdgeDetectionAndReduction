@@ -25,26 +25,26 @@
 
 
             var x = convolution3x3(imageData,blurConv2);
+
             for(i = 0; i<imageData.data.length;i++){
                 imageData.data[i] = x[i];
             }
+
 
 
             var XSobelKernel = [-1,0,1,-2,0,2,-1,0,1];
             var YSobelKernel = [-1,-2,-1,0,0,0,1,2,1];
             var Gx = convolution3x3(imageData,XSobelKernel);
             var Gy = convolution3x3(imageData,YSobelKernel);
-            var G = magnitude(imageData,Gx,Gy);
+
+
+
+             var G = magnitude(imageData,Gx,Gy);
+             imageData.data[i] = [i];
+
             var theta = getEdgeOrientation(imageData,Gx,Gy);
 
-            edgeTrace(G,theta,imageData);
-
-
-
-
-
-
-
+             edgeTrace(G,theta,imageData);
 
 
 
@@ -56,21 +56,47 @@
 
         }
         function compass(){
+
             var imageData = ctx.getImageData(0, 0, imgWidth, imgHeight);
+
+
+            var blurConv2 = [1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9];
+
             greyscale(imageData);
-            var Gx = [1,0,-1,1,0,-1,1,0,-1];
-            var Gy = [1,1,1,0,0,0,-1,-1,-1];
+
+            var x = convolution3x3(imageData,blurConv2);
+
+            for(i = 0; i<imageData.data.length;i++){
+                imageData.data[i] = x[i];
+            }
+
+
+
+            var xkernel = [1,0,-1,1,0,-1,1,0,-1];
+            var ykernel = [1,1,1,0,0,0,-1,-1,-1];
+            var Gx = convolution3x3(imageData,xkernel);
+            var Gy = convolution3x3(imageData,ykernel);
             var G = magnitude(imageData,Gx,Gy);
+            for(i = 0; i<imageData.data.length;i++){
+                imageData.data[i] = G[i];
+            }
             var theta = getEdgeOrientation(imageData,Gx,Gy);
+            RelaxationApproach2(G,theta,imageData);
+            ctx.putImageData(imageData, 0, 0);
         }
     </script>
 </head>
 
 <body>
 <canvas id="canvas" style="border-width:1px; border-style:solid;" width="500" height="500"></canvas><br>
-<input type="text" id="filename" style="width:600px;" value="images/cookiemonster.jpg"> <input type="button" style="width:100px;" onclick="loadImage();" value="Load Image"><br>
+<input type="text" id="filename" style="width:600px;" value="images/test.jpg"> <input type="button" style="width:100px;" onclick="loadImage();" value="Load Image"><br>
 
 
-<input type="button" style="width:180px;" value="Apply Convolution Kernel" onclick="doConvolution();">
+<input type="button" style="width:180px;" value="Relax1" onclick="doConvolution();">
+
+<input type="button" style="width:180px;" value="Relax2" onclick="compass();">
+
+
+
 </body>
 </html>
