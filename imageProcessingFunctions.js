@@ -1,5 +1,4 @@
-// useful image processing functions for Canvas imageData
-// Author: Sam Redfern, 2014-2017
+
 
 function readImage(canvas,filename,callback) {
       var img = new Image();

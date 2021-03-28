@@ -1,7 +1,3 @@
-// image processing functions for Canvas imageData
-//  - related to frame differencing operations
-//  - also related to background-modelling
-// Author: Sam Redfern, 2017
 
 var cachedImageData = [];
 var numImagesCached;
